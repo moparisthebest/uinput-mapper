@@ -12,28 +12,42 @@ try:
 except ImportError:
     import pickle
 
-import optparse
+import argparse
 
 _usage = 'input-read /dev/input/event<0> ... /dev/input/event<N>'
-parser = optparse.OptionParser(description='Read input devices.',
-        usage = _usage,
-        version='0.01')
-parser.add_option('-D', '--dump', action='store_false',
+parser = argparse.ArgumentParser(description='Read input devices.',
+        usage = _usage)
+parser.add_argument('--version', action='version', version='0.01')
+parser.add_argument('-D', '--dump', action='store_false',
         default=True, help='Dump will marshall all the events to stdout')
-parser.add_option('-v', '--verbose', action='store_true',
+parser.add_argument('-v', '--verbose', action='store_true',
         default=False, help='Enable verbose mode (do not combine with -D)')
 
-parser.add_option('-C', '--compat', action='store_true',
+parser.add_argument('-k', '--keymap', dest='keymap',
+    help='Python keymap configuration to source')
+
+parser.add_argument('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
-args, input_file = parser.parse_args()
+parser.add_argument('-ng', '--no-grab', action='store_true',
+        default=False, help='Will not grab input devices, so other programs like X might still read from them')
 
-if len(input_file) == 0:
-    parser.print_help()
-    exit(0)
+parser.add_argument('-d', '--direct', action='store_true',
+        default=False, help='Will directly create input devices to send events to, instead of piping to input-create')
+parser.add_argument('-c', '--config', metavar='config', nargs='*',
+                   help='Path to config files you would normally send into input-create, implies --direct')
+
+parser.add_argument('input_file', metavar='input_file', nargs='+',
+                   help='/dev/input/event<0> ... /dev/input/event<N>')
+
+args = parser.parse_args()
+args.has_config = args.config != None and len(args.config) > 0
+
+#print 'args:',args
+#exit(0)
 
 # Open input devices
-fs = map(InputDevice, input_file)
+fs = map(InputDevice, args.input_file)
 
 # Create configuration
 config = {}
@@ -41,6 +55,13 @@ for idx, f in enumerate(fs):
     c = parse_conf(f, idx)
 
     config.update(c)
+
+if args.has_config:
+    # Allow configurations to change our current configuration
+    args.direct = True
+    for path in args.config:
+        config_merge = imp.load_source('', path).config_merge
+        config_merge(config)
 
 if args.verbose:
     pretty_conf_print(config)
@@ -62,16 +83,41 @@ if args.dump:
         d = f.get_exposed_events()
         for k, v in d.iteritems():
             print k + ':', ', '.join(v)
-
 else:
     # Dump initial information over pickle to stdout
     p = pickle.Pickler(sys.stdout)
-
     p.dump(len(fs))
-
     p.dump(config)
-
     sys.stdout.flush()
+
+# parse keymap
+if args.keymap:
+    from uinputmapper.keymapper import parse_keymap
+    runtime_keymaps, active_keymap_index, revert_keymap_index, active_keymap, revert_default_code, switch_layout_codes, switch_layout_mode, num_codes_to_index = parse_keymap(args, rev_event_keys, event_keys)
+
+if args.direct:
+    # setup a new input device
+    m = KeyMapper(config)
+
+    # Get number of output devices (determined from config)
+    from uinputmapper.mapper import get_exported_device_count
+    nofd = get_exported_device_count(config)
+    # Create and expose uinput devices
+    ofs = []
+    for fd in xrange(nofd):
+        d = UInputDevice()
+        m.expose(d, fd)
+        d.setup('keymapper input device'+str(fd))
+        ofs.append(d)
+
+# grab all inputs so nothing else reads them :)
+if not args.no_grab:
+    for idx, f in enumerate(fs):
+        f.grab()
+
+# try to free as much memory as we can before entering loop
+from gc import collect as gc_collect
+gc_collect()
 
 while True:
     events = pp.poll()
@@ -90,20 +136,54 @@ while True:
 
         ev = f.next_event()
 
-        if args.dump:
+        if args.keymap:
+            #if ev.type == 4: # MSC_SCAN, works for some keyboards (serio) but not others (usb), not needed if we grab the input
+            #    ev.value = active_keymap[ev.value]
+            if ev.type == 1: # EV_KEY
+                ev.code = active_keymap[ev.code]
+                # we want some events to happen when a key is first pressed or lifted
+                if ev.value == 1: # pressed
+                    if ev.code == revert_default_code:
+                        active_keymap = runtime_keymaps[revert_keymap_index]
+                    elif ev.code in switch_layout_codes:
+                        switch_layout_codes[ev.code] = True
+                        # so loop through switch_layout_codes and see if all are True
+                        switch_layout_mode = True
+                        for x,y in switch_layout_codes.iteritems():
+                            switch_layout_mode &= y
+                    elif switch_layout_mode and ev.code in num_codes_to_index:
+                        active_keymap_index = num_codes_to_index[ev.code]
+                        active_keymap = runtime_keymaps[active_keymap_index]
+                        # and continue so as to not send this key
+                        continue
+                elif ev.value == 0: # lifted
+                    if ev.code == revert_default_code:
+                        active_keymap = runtime_keymaps[active_keymap_index]
+                    elif ev.code in switch_layout_codes:
+                        switch_layout_codes[ev.code] = False
+                        switch_layout_mode = False
+
+        if args.direct:
+            # try to fire our own events?
+            if args.has_config:
+                idx, ev = m.map_event(ev, i)
+                d = ofs[idx]
+            else:
+                d = ofs[i]
+            d.fire_event(ev)
+        elif args.dump:
             try:
+                #print 'ev.type:', ev.type
                 print i, ev.time.tv_sec, ev.time.tv_usec
-                s = '%s %s %d' % (rev_events[ev.type],
-                        rev_event_keys[ev.type][ev.code], ev.value)
+                s = '%s(%d) %s(%d) %d' % (rev_events[ev.type], ev.type,
+                        rev_event_keys[ev.type][ev.code], ev.code, ev.value)
                 print 'Event type:', s
             except KeyError:
                pass
-
         else:
             if not args.compat:
                 p.dump((i, ev))
             else:
                 p.dump((i, (ev.time.tv_sec, ev.time.tv_usec,
                     ev.type, ev.code, ev.value)))
-
             sys.stdout.flush()
