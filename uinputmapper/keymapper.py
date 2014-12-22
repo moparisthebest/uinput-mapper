@@ -3,6 +3,33 @@
 Module to help with creating fast keycode mapping arrays
 """
 
+class KeyCodeMapper(object):
+
+    def __init__(self, noshift_code, noshift_invert_shift, shift_code, shift_invert_shift):
+        self.noshift_code = noshift_code
+        self.noshift_invert_shift = noshift_invert_shift
+        self.shift_code = shift_code
+        self.shift_invert_shift = shift_invert_shift
+
+    def get_code(self, old_code, shift_down):
+        # returns new_code, invert_shift
+        if shift_down:
+            return self.shift_code, self.shift_invert_shift
+        else:
+            return self.noshift_code, self.noshift_invert_shift
+
+    def __repr__(self):
+        return "KCM{%3s (%5s) : %3s (%5s)}" % (self.noshift_code, self.noshift_invert_shift, self.shift_code, self.shift_invert_shift)
+
+class NoopKCM(object):
+
+    def get_code(self, old_code, shift_down):
+        # returns new_code, invert_shift
+        return old_code, False
+
+    def __repr__(self):
+        return "KCM{NOOP}"
+
 def parse_keymap(args, rev_event_keys, event_keys):
     """
     Reads in a keymap configuration and returns structures to implement it
@@ -67,31 +94,43 @@ def parse_keymap(args, rev_event_keys, event_keys):
         'SLSH':'SLASH',
         'SPC':'SPACE',
     }
+    shift_key_list = []
     keymap_list = []
     for keymap in keymaps:
         key_list = []
         keymap_list.append(key_list)
         for key in keymap.split(','):
-            key = key.strip()
+            key = key.strip() # remove whitespace
+            key_arr = key.split(':')
+            noshift_invert_shift = '^' == key_arr[0][0]
+            key = key_arr[0].strip('^')
             new_key = 'KEY_'+short_to_long.get(key, key)
             if args.dump and new_key not in event_keys[1]: # todo: probably should exit with some helpful error here?
-                #print 'Key', key, 'does not exist!'
-                #print "'", key, "':'',"
                 print "'%s':''," % key
-            key_list.append(new_key)
+            noshift_code = event_keys[1][new_key]
+            if len(key_arr) == 1:
+                shift_invert_shift = noshift_invert_shift
+                shift_code = noshift_code
+            else:
+                shift_invert_shift = '^' != key_arr[1][0]
+                key = key_arr[1].strip('^')
+                new_key = 'KEY_'+short_to_long.get(key, key)
+                if args.dump and new_key not in event_keys[1]: # todo: probably should exit with some helpful error here?
+                    print "'%s':''," % key
+                shift_code = event_keys[1][new_key]
+            key_list.append(KeyCodeMapper(noshift_code, noshift_invert_shift, shift_code, shift_invert_shift))
 
     #pprint.pprint(keymap_list)
     #exit(0)
     mykeymaps = []
     default_keymap = keymap_list[0]
     keymap_range = range(0, len(default_keymap))
-    from array import array
     for keymap in keymap_list:
         mykeymap = {}
         mykeymaps.append(mykeymap)
         for y in keymap_range:
             if default_keymap[y] != keymap[y]:
-                mykeymap[default_keymap[y]] = keymap[y]
+                mykeymap[default_keymap[y].noshift_code] = keymap[y]
 
     #pprint.pprint(mykeymaps)
     #exit(0)
@@ -103,17 +142,19 @@ def parse_keymap(args, rev_event_keys, event_keys):
     #exit(0)
     # convert mykeymap once, at startup, to a faster array, possibly using a little more memory
     keycnt_range = range(0, event_keys[1]['KEY_CNT'])
+
+    noop = NoopKCM()
     runtime_keymaps = []
     for mykeymap in mykeymaps:
-        mycodemap = array('H')
+        mycodemap = []
         runtime_keymaps.append(mycodemap)
         for x in keycnt_range:
-            key = rev_event_keys[1].get(x, 'NO_KEY_EXISTS_FOR_THIS_INDEX')
-            value = event_keys[1].get(mykeymap.get(key, key), x)
-            mycodemap.append(value)
+            mycodemap.append(mykeymap.get(x, noop))
+
     #print 'mycodemap: ', mycodemap
     #pprint.pprint(runtime_keymaps)
     #exit(0)
+
     active_keymap_index = default_keymap_index
     revert_default_code = event_keys[1]['KEY_'+revert_default_key]
     active_keymap = runtime_keymaps[active_keymap_index]

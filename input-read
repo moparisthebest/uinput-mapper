@@ -94,6 +94,9 @@ else:
 if args.keymap:
     from uinputmapper.keymapper import parse_keymap
     runtime_keymaps, active_keymap_index, revert_keymap_index, active_keymap, revert_default_code, switch_layout_codes, switch_layout_mode, num_codes_to_index = parse_keymap(args, rev_event_keys, event_keys)
+    shift_down = -1
+    rshift = event_keys[1]['KEY_RIGHTSHIFT']
+    lshift = event_keys[1]['KEY_LEFTSHIFT']
 
 if args.direct:
     # setup a new input device
@@ -136,13 +139,25 @@ while True:
 
         ev = f.next_event()
 
+        pre_event = None
+        post_event = None
+
         if args.keymap:
             #if ev.type == 4: # MSC_SCAN, works for some keyboards (serio) but not others (usb), not needed if we grab the input
             #    ev.value = active_keymap[ev.value]
             if ev.type == 1: # EV_KEY
-                ev.code = active_keymap[ev.code]
+                new_code, invert_shift = active_keymap[ev.code].get_code(ev.code, shift_down != -1)
                 # we want some events to happen when a key is first pressed or lifted
                 if ev.value == 1: # pressed
+                    if ev.code == lshift or ev.code == rshift: # shift
+                        shift_down = ev.code
+
+                    if invert_shift: # swap shift behavior
+                        pre_event = input_event(ev.time, 1, shift_down, 0)
+                        if shift_down == -1:
+                            pre_event.code = lshift
+                            pre_event.value = 1
+
                     if ev.code == revert_default_code:
                         active_keymap = runtime_keymaps[revert_keymap_index]
                     elif ev.code in switch_layout_codes:
@@ -157,11 +172,22 @@ while True:
                         # and continue so as to not send this key
                         continue
                 elif ev.value == 0: # lifted
+                    if ev.code == lshift or ev.code == rshift: # shift
+                        shift_down = -1
+
+                    if invert_shift: # swap shift behavior
+                        post_event = input_event(ev.time, 1, shift_down, 1)
+                        if shift_down == -1:
+                            post_event.code = lshift
+                            post_event.value = 0
+
                     if ev.code == revert_default_code:
                         active_keymap = runtime_keymaps[active_keymap_index]
                     elif ev.code in switch_layout_codes:
                         switch_layout_codes[ev.code] = False
                         switch_layout_mode = False
+                # now actually map the key
+                ev.code = new_code
 
         if args.direct:
             # try to fire our own events?
@@ -170,20 +196,31 @@ while True:
                 d = ofs[idx]
             else:
                 d = ofs[i]
+            if pre_event is not None:
+                d.fire_event(pre_event)
             d.fire_event(ev)
+            if post_event is not None:
+                d.fire_event(post_event)
         elif args.dump:
-            try:
-                #print 'ev.type:', ev.type
-                print i, ev.time.tv_sec, ev.time.tv_usec
-                s = '%s(%d) %s(%d) %d' % (rev_events[ev.type], ev.type,
-                        rev_event_keys[ev.type][ev.code], ev.code, ev.value)
-                print 'Event type:', s
-            except KeyError:
-               pass
+            for ev in [pre_event, ev, post_event]:
+                if ev is not None:
+                    try:
+                        print i, ev.time.tv_sec, ev.time.tv_usec
+                        s = '%s(%d) %s(%d) %d' % (rev_events[ev.type], ev.type, rev_event_keys[ev.type][ev.code], ev.code, ev.value)
+                        print 'Event type:', s
+                    except KeyError:
+                        pass
         else:
             if not args.compat:
+                if pre_event is not None:
+                    p.dump((i, pre_event))
                 p.dump((i, ev))
+                if post_event is not None:
+                    p.dump((i, post_event))
             else:
-                p.dump((i, (ev.time.tv_sec, ev.time.tv_usec,
-                    ev.type, ev.code, ev.value)))
+                if pre_event is not None:
+                    p.dump((i, (pre_event.time.tv_sec, pre_event.time.tv_usec, pre_event.type, pre_event.code, pre_event.value)))
+                p.dump((i, (ev.time.tv_sec, ev.time.tv_usec, ev.type, ev.code, ev.value)))
+                if post_event is not None:
+                    p.dump((i, (post_event.time.tv_sec, post_event.time.tv_usec, post_event.type, post_event.code, post_event.value)))
             sys.stdout.flush()

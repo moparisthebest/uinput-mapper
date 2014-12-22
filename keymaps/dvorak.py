@@ -9,8 +9,8 @@ revert_default_key = 'LEFTCTRL'
 revert_keymap_index = 0
 
 # this is the default index to use when the program first starts
-# in this case, 1 means Dvorak
-default_keymap_index = 1
+# in this case, 2 means modified Progammer Dvorak
+default_keymap_index = 2
 
 # these are the keymaps available, you can add as many as you want or re-order them, just be aware the mapping is
 # always done from the first one to all subsequent ones, so you probably want to leave QWERTY or similar up top
@@ -32,5 +32,25 @@ keymaps = [
     CAPS,A,   O,   E,   U,   I,   D,   H,   T,   N,   S,   MINS,     ENT,                         P4,  P5,  P6,  PPLS,
     LSFT,SCLN,Q,   J,   K,   X,   B,   M,   W,   V,   Z,             RSFT,          UP,           P1,  P2,  P3,
     LCTL,LGUI,LALT,          SPC,                     RALT,RGUI,APP, RCTL,     LEFT,DOWN,RGHT,    P0,       PDOT,PENT
+    """,
+    # Programmer Dvorak http://www.kaufmann.no/roland/dvorak/ without numpad re-ordered
+    # (to be strict QUOT/SCLN are swapped from regular dvorak, though I can't understand why so I ignored it...)
+    """
+    ESC,      F1,    F2,     F3,      F4,      F5,   F6,    F7,   F8,   F9,     F10,    F11,  F12,              PSCR,SLCK,BRK,
+    ^4:^GRV,  ^7:^5, LBRC:7, ^LBRC:5, ^RBRC:3, ^9:1, EQL:9, ^8:0, ^0:2, ^EQL:4, RBRC:6, ^1:8, ^3:GRV, BSPC,     INS, HOME,PGUP,    NLCK,   PSLS:^9, PAST:^0,   PMNS:^4,
+    TAB,      QUOT,  COMM,   DOT,     P,       Y,    F,     G,    C,    R,      L,      SLSH, ^2:^6,  BSLS,     DEL, END, PGDN,    P7:^A,  P8:^B,   P9:^C,
+    CAPS,     A,     O,      E,       U,       I,    D,     H,    T,    N,      S,      MINS,         ENT,                         P4:^D,  P5:^E,   P6:^F,     PPLS:COMM,
+    LSFT,     SCLN,  Q,      J,       K,       X,    B,     M,    W,    V,      Z,                    RSFT,          UP,           P1:EQL, P2:X,    P3:^SCLN,
+    LCTL,     LGUI,  LALT,                     SPC,                             RALT,   RGUI, APP,    RCTL,     LEFT,DOWN,RGHT,    P0:BSLS,         PDOT:SCLN, PENT
+    """,
+    # Programmer Dvorak http://www.kaufmann.no/roland/dvorak/
+    # (to be strict QUOT/SCLN are swapped from regular dvorak, though I can't understand why so I ignored it...)
+    """
+    ESC,      F1,    F2,     F3,      F4,      F5,   F6,    F7,   F8,   F9,     F10,    F11,  F12,              PSCR,SLCK,BRK,
+    ^4:^GRV,  ^7:^5, LBRC:7, ^LBRC:5, ^RBRC:3, ^9:1, EQL:9, ^8:0, ^0:2, ^EQL:4, RBRC:6, ^1:8, ^3:GRV, BSPC,     INS, HOME,PGUP,    NLCK,   PSLS:^9, PAST:^0,   PMNS:^4,
+    TAB,      QUOT,  COMM,   DOT,     P,       Y,    F,     G,    C,    R,      L,      SLSH, ^2:^6,  BSLS,     DEL, END, PGDN,    P1:^A,  P2:^B,   P3:^C,
+    CAPS,     A,     O,      E,       U,       I,    D,     H,    T,    N,      S,      MINS,         ENT,                         P4:^D,  P5:^E,   P6:^F,     PPLS:COMM,
+    LSFT,     SCLN,  Q,      J,       K,       X,    B,     M,    W,    V,      Z,                    RSFT,          UP,           P7:EQL, P8:X,    P9:^SCLN,
+    LCTL,     LGUI,  LALT,                     SPC,                             RALT,   RGUI, APP,    RCTL,     LEFT,DOWN,RGHT,    P0:BSLS,         PDOT:SCLN, PENT
     """,
     ]
