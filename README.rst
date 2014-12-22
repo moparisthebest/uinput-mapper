@@ -39,4 +39,4 @@ Development notes
 
 Generating uinputmapper/uinput_gen.py:
 
-    gcc -E -dM /usr/include/linux/input.h | egrep ' (EV|SYN|KEY|BTN|REL|ABS|MSC|LED|SND|REP|SW)_[A-Za-z0-9_]+' | ( echo "#include <linux/input.h>" ; echo "input_constants_dict = {" ; awk '{print "\""$2"\" : " $3","}' ; echo "}" ) | gcc -E -o /dev/stdout - | awk '{ if ($0 == "input_constants_dict = {") pit=1; if (pit == 1) print $0; }' > uinputmapper/uinput_gen.py
+    gcc -E -dM /usr/include/linux/input.h | egrep ' (EV|SYN|KEY|BTN|REL|ABS|MSC|LED|SND|REP|SW)_[A-Za-z0-9_]+' | ( echo "#include <linux/input.h>" ; echo "input_constants_dict = {" ; awk '{print "\\""$2"\\" : " $3","}' ; echo "}" ) | gcc -E -o /dev/stdout - | awk '{ if ($0 == "input_constants_dict = {") pit=1; if (pit == 1) print $0; }' > uinputmapper/uinput_gen.py
