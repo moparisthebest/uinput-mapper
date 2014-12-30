@@ -93,10 +93,12 @@ else:
 # parse keymap
 if args.keymap:
     from uinputmapper.keymapper import parse_keymap
-    runtime_keymaps, active_keymap_index, revert_keymap_index, active_keymap, revert_default_code, switch_layout_codes, switch_layout_mode, num_codes_to_index = parse_keymap(args, rev_event_keys, event_keys)
+    runtime_keymaps, active_keymap_index, revert_keymap_index, active_keymap, revert_default_code, switch_layout_codes, switch_layout_mode, num_codes_to_index, caps_lock_no_effect = parse_keymap(args, rev_event_keys, event_keys)
     shift_down = -1
+    caps_locked = False # todo: get/set this a sane way?
     rshift = event_keys[1]['KEY_RIGHTSHIFT']
     lshift = event_keys[1]['KEY_LEFTSHIFT']
+    capslck = event_keys[1]['KEY_CAPSLOCK']
 
 if args.direct:
     # setup a new input device
@@ -146,13 +148,20 @@ while True:
             #if ev.type == 4: # MSC_SCAN, works for some keyboards (serio) but not others (usb), not needed if we grab the input
             #    ev.value = active_keymap[ev.value]
             if ev.type == 1: # EV_KEY
-                new_code, invert_shift = active_keymap[ev.code].get_code(ev.code, shift_down != -1)
+                new_code, invert_shift = active_keymap[ev.code].get_code(ev.code, caps_locked != (shift_down != -1))
+
                 # we want some events to happen when a key is first pressed or lifted
                 if ev.value == 1: # pressed
                     if ev.code == lshift or ev.code == rshift: # shift
                         shift_down = ev.code
+                    elif ev.code == capslck: # caps locked
+                        caps_locked = not caps_locked
 
+
+                    if caps_locked and caps_lock_no_effect[new_code]:
+                        invert_shift = not invert_shift
                     if invert_shift: # swap shift behavior
+                    # if (invert_shift and not(caps_locked and caps_lock_no_effect[new_code])) or (not(invert_shift) and (caps_locked and caps_lock_no_effect[new_code])): # not as clean as above?
                         pre_event = input_event(ev.time, 1, shift_down, 0)
                         if shift_down == -1:
                             pre_event.code = lshift
@@ -175,6 +184,8 @@ while True:
                     if ev.code == lshift or ev.code == rshift: # shift
                         shift_down = -1
 
+                    if caps_locked and caps_lock_no_effect[new_code]:
+                        invert_shift = not invert_shift
                     if invert_shift: # swap shift behavior
                         post_event = input_event(ev.time, 1, shift_down, 1)
                         if shift_down == -1:

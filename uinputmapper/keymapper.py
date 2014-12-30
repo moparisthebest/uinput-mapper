@@ -40,6 +40,7 @@ def parse_keymap(args, rev_event_keys, event_keys):
     revert_default_key = keymap_config['revert_default_key']
     revert_keymap_index = keymap_config['revert_keymap_index']
     default_keymap_index = keymap_config['default_keymap_index']
+    caps_lock_modify = keymap_config['caps_lock_modify']
     keymaps = keymap_config['keymaps']
     #print keymap_config
     #exit(0)
@@ -169,4 +170,18 @@ def parse_keymap(args, rev_event_keys, event_keys):
     #pprint.pprint(num_codes_to_index)
     #exit(0)
 
-    return runtime_keymaps, active_keymap_index, revert_keymap_index, active_keymap, revert_default_code, switch_layout_codes, switch_layout_mode, num_codes_to_index
+    # again quick array index based lookup
+    caps_lock_no_effect = []
+    for x in keycnt_range:
+      caps_lock_no_effect.append(False)
+    for key in caps_lock_modify.split(','):
+      key = key.strip() # remove whitespace
+      new_key = 'KEY_'+short_to_long.get(key, key)
+      if args.dump and new_key not in event_keys[1]: # todo: probably should exit with some helpful error here?
+        print "'%s':''," % key
+        continue
+      caps_lock_no_effect[event_keys[1][new_key]] = True
+    #pprint.pprint(caps_lock_no_effect)
+    #exit(0)
+
+    return runtime_keymaps, active_keymap_index, revert_keymap_index, active_keymap, revert_default_code, switch_layout_codes, switch_layout_mode, num_codes_to_index, caps_lock_no_effect

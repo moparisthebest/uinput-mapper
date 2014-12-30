@@ -12,6 +12,15 @@ revert_keymap_index = 0
 # in this case, 2 means modified Progammer Dvorak
 default_keymap_index = 2
 
+# these are keys that caps_lock doesn't modify by default, but that you would like it to, affects all keymaps
+caps_lock_modify = """
+    GRV, 1,   2,   3,   4,   5,   6,   7,   8,   9,   0,   MINS,EQL, BSPC,                             PSLS,PAST,PMNS,
+                                                           LBRC,RBRC,BSLS,                        P7,  P8,  P9,
+                                                      SCLN,QUOT,                                  P4,  P5,  P6,  PPLS,
+                                            COMM,DOT, SLSH,                                       P1,  P2,  P3,
+                                                                                                  P0,       PDOT
+    """
+
 # these are the keymaps available, you can add as many as you want or re-order them, just be aware the mapping is
 # always done from the first one to all subsequent ones, so you probably want to leave QWERTY or similar up top
 keymaps = [
