@@ -25,6 +25,7 @@ keymaps = [
     LCTL,LGUI,LALT,          SPC,                     RALT,RGUI,APP, RCTL,     LEFT,DOWN,RGHT,    P0,       PDOT,PENT
     """,
     # Dvorak http://en.wikipedia.org/wiki/Dvorak_Simplified_Keyboard
+    # https://www.moparisthebest.com/kbs/standard-dvorak-QwertySecondary.svg
     """
     ESC, F1,  F2,  F3,  F4,  F5,  F6,  F7,  F8,  F9,  F10, F11, F12,           PSCR,SLCK,BRK,
     GRV, 1,   2,   3,   4,   5,   6,   7,   8,   9,   0,   LBRC,RBRC,BSPC,     INS, HOME,PGUP,    NLCK,PSLS,PAST,PMNS,
@@ -33,24 +34,24 @@ keymaps = [
     LSFT,SCLN,Q,   J,   K,   X,   B,   M,   W,   V,   Z,             RSFT,          UP,           P1,  P2,  P3,
     LCTL,LGUI,LALT,          SPC,                     RALT,RGUI,APP, RCTL,     LEFT,DOWN,RGHT,    P0,       PDOT,PENT
     """,
-    # Programmer Dvorak http://www.kaufmann.no/roland/dvorak/ without numpad re-ordered
-    # (to be strict QUOT/SCLN are swapped from regular dvorak, though I can't understand why so I ignored it...)
+    # Unix Dvorak Programmer Dvorak - for unix developers who are switching from dvorak
+    # https://www.moparisthebest.com/kbs/programmer-dvorak-QwertySecondary-NumpadPhone-NoSwap-StandardNums-SwapAt-SwapPipe.svg
     """
-    ESC,      F1,    F2,     F3,      F4,      F5,   F6,    F7,   F8,   F9,     F10,    F11,  F12,              PSCR,SLCK,BRK,
-    ^4:^GRV,  ^7:^5, LBRC:7, ^LBRC:5, ^RBRC:3, ^9:1, EQL:9, ^8:0, ^0:2, ^EQL:4, RBRC:6, ^1:8, ^3:GRV, BSPC,     INS, HOME,PGUP,    NLCK,   PSLS:^9, PAST:^0,   PMNS:^4,
-    TAB,      QUOT,  COMM,   DOT,     P,       Y,    F,     G,    C,    R,      L,      SLSH, ^2:^6,  BSLS,     DEL, END, PGDN,    P7:^A,  P8:^B,   P9:^C,
-    CAPS,     A,     O,      E,       U,       I,    D,     H,    T,    N,      S,      MINS,         ENT,                         P4:^D,  P5:^E,   P6:^F,     PPLS:COMM,
-    LSFT,     SCLN,  Q,      J,       K,       X,    B,     M,    W,    V,      Z,                    RSFT,          UP,           P1:EQL, P2:X,    P3:^SCLN,
-    LCTL,     LGUI,  LALT,                     SPC,                             RALT,   RGUI, APP,    RCTL,     LEFT,DOWN,RGHT,    P0:BSLS,         PDOT:SCLN, PENT
+    ESC,      F1,    F2,     F3,      F4,      F5,   F6,    F7,   F8,   F9,     F10,    F11,   F12,                 PSCR,SLCK,BRK,
+    ^4:^GRV,  ^7:1,  LBRC:2, ^LBRC:3, ^RBRC:4, ^9:5, ^2:6,  ^8:7, ^0:8, ^EQL:9, RBRC:0, ^1:^5, ^3:GRV, BSPC,        INS, HOME,PGUP,    NLCK,   PSLS:^9, PAST:^0,   PMNS:^4,
+    TAB,      QUOT,  COMM,   DOT,     P,       Y,    F,     G,    C,    R,      L,      SLSH,  EQL:^6, ^BSLS:BSLS,  DEL, END, PGDN,    P1:^A,  P2:^B,   P3:^C,
+    CAPS,     A,     O,      E,       U,       I,    D,     H,    T,    N,      S,      MINS,          ENT,                            P4:^D,  P5:^E,   P6:^F,     PPLS:COMM,
+    LSFT,     SCLN,  Q,      J,       K,       X,    B,     M,    W,    V,      Z,                     RSFT,             UP,           P7:EQL, P8:X,    P9:^SCLN,
+    LCTL,     LGUI,  LALT,                     SPC,                             RALT,   RGUI,  APP,    RCTL,        LEFT,DOWN,RGHT,    P0:BSLS,         PDOT:SCLN, PENT
     """,
     # Programmer Dvorak http://www.kaufmann.no/roland/dvorak/
-    # (to be strict QUOT/SCLN are swapped from regular dvorak, though I can't understand why so I ignored it...)
+    # https://www.moparisthebest.com/kbs/programmer-dvorak-QwertySecondary-NumpadPhone-StrictSwap-StrictNums-StrictAt-StrictPipe.svg
     """
-    ESC,      F1,    F2,     F3,      F4,      F5,   F6,    F7,   F8,   F9,     F10,    F11,  F12,              PSCR,SLCK,BRK,
-    ^4:^GRV,  ^7:^5, LBRC:7, ^LBRC:5, ^RBRC:3, ^9:1, EQL:9, ^8:0, ^0:2, ^EQL:4, RBRC:6, ^1:8, ^3:GRV, BSPC,     INS, HOME,PGUP,    NLCK,   PSLS:^9, PAST:^0,   PMNS:^4,
-    TAB,      QUOT,  COMM,   DOT,     P,       Y,    F,     G,    C,    R,      L,      SLSH, ^2:^6,  BSLS,     DEL, END, PGDN,    P1:^A,  P2:^B,   P3:^C,
-    CAPS,     A,     O,      E,       U,       I,    D,     H,    T,    N,      S,      MINS,         ENT,                         P4:^D,  P5:^E,   P6:^F,     PPLS:COMM,
-    LSFT,     SCLN,  Q,      J,       K,       X,    B,     M,    W,    V,      Z,                    RSFT,          UP,           P7:EQL, P8:X,    P9:^SCLN,
-    LCTL,     LGUI,  LALT,                     SPC,                             RALT,   RGUI, APP,    RCTL,     LEFT,DOWN,RGHT,    P0:BSLS,         PDOT:SCLN, PENT
+    ESC,      F1,    F2,     F3,      F4,      F5,   F6,    F7,   F8,   F9,     F10,    F11,   F12,                 PSCR,SLCK,BRK,
+    ^4:^GRV,  ^7:^5, LBRC:7, ^LBRC:5, ^RBRC:3, ^9:1, EQL:9, ^8:0, ^0:2, ^EQL:4, RBRC:6, ^1:8,  ^3:GRV, BSPC,        INS, HOME,PGUP,    NLCK,   PSLS:^9, PAST:^0,   PMNS:^4,
+    TAB,      SCLN,  COMM,   DOT,     P,       Y,    F,     G,    C,    R,      L,      SLSH,  ^2:^6,  BSLS,        DEL, END, PGDN,    P1:^A,  P2:^B,   P3:^C,
+    CAPS,     A,     O,      E,       U,       I,    D,     H,    T,    N,      S,      MINS,          ENT,                            P4:^D,  P5:^E,   P6:^F,     PPLS:COMM,
+    LSFT,     QUOT,  Q,      J,       K,       X,    B,     M,    W,    V,      Z,                     RSFT,             UP,           P7:EQL, P8:X,    P9:^SCLN,
+    LCTL,     LGUI,  LALT,                     SPC,                             RALT,   RGUI,  APP,    RCTL,        LEFT,DOWN,RGHT,    P0:BSLS,         PDOT:SCLN, PENT
     """,
     ]
