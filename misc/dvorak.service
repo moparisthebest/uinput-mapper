@@ -1,0 +1,9 @@
+[Unit]
+Description=Dvorak Daemon
+
+[Service]
+ExecStart=/root/dvorak_systemd.sh
+StartLimitInterval=0
+
+[Install]
+WantedBy=default.target

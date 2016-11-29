@@ -1,0 +1,9 @@
+[Unit]
+Description=kbwait Dvorak Daemon
+After=dvorak.service
+
+[Service]
+ExecStart=/root/kbwait_systemd.sh
+
+[Install]
+WantedBy=default.target
