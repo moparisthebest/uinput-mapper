@@ -112,7 +112,7 @@ if args.direct:
     for fd in xrange(nofd):
         d = UInputDevice()
         m.expose(d, fd)
-        d.setup('keymapper input device'+str(fd))
+        d.setup('keymapper input device')
         ofs.append(d)
 
 # grab all inputs so nothing else reads them :)
